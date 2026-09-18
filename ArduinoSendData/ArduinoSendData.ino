@@ -48,7 +48,7 @@ void loop()
     
     
     //
-    // transmit one line of text to phython with 4 numeric values
+    // transmit one line of text to python with 4 numeric values
     // NOTE: commas are sent between values, after the last value a Newline is sent
     //
     Serial.print(a);    Serial.print(",");
