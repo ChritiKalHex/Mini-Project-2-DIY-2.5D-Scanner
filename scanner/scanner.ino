@@ -16,7 +16,7 @@ int8_t INCREMENT = 5;
 
 // Set the IR constatns.
 uint8_t IR_PORT = 0;
-float VOLTS_TO_METERS = 1;
+float VOLTS_TO_METERS[] = {0.0946, -0.7226, 2.1211, -3.0729, 2.2281};
 
 // Initialize the servos and their positions.
 Servo yaw_servo;
@@ -33,6 +33,9 @@ void setup() {
   // Setup the servos.
   yaw_servo.attach(YAW_PORT);
   pitch_servo.attach(PITCH_PORT);
+
+  // Allow time for the grapher to be started
+  delay(10000);
 }
 
 void loop() {
@@ -47,7 +50,11 @@ void loop() {
 
   // Claculate the distance.
   uint16_t voltage = min(min(scan1, scan2), scan3);
-  float distance = voltage * VOLTS_TO_METERS;
+  float distance = VOLTS_TO_METERS[0] * pow(voltage, 4) +
+    VOLTS_TO_METERS[1] * pow(voltage, 3) +
+    VOLTS_TO_METERS[2] * pow(voltage, 2) +
+    VOLTS_TO_METERS[3] * voltage +
+    VOLTS_TO_METERS[0];
 
   // Transmit one line of text to python with the pitch, yaw, and distance values.
   // NOTE: commas are sent between values, after the last value a Newline is sent.
