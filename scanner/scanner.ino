@@ -8,7 +8,7 @@
 #include <Servo.h>
 
 // Set servo constants.
-uint8_t RANGE_MIN = 0;
+uint8_t RANGE_MIN = 45;
 uint8_t RANGE_MAX = 90;
 uint8_t YAW_PORT = 3;
 uint8_t PITCH_PORT = 5;
@@ -34,27 +34,28 @@ void setup() {
   yaw_servo.attach(YAW_PORT);
   pitch_servo.attach(PITCH_PORT);
 
+  // Set the servo positions.
+  yaw_servo.write(yaw);
+  pitch_servo.write(pitch);
+
   // Allow time for the grapher to be started
   delay(10000);
 }
 
 void loop() {
-  // Set the servo positions.
-  yaw_servo.write(yaw);
-  pitch_servo.write(pitch);
-
   // Scan with the IR sensor.
   uint16_t scan1 = analogRead(IR_PORT);
   uint16_t scan2 = analogRead(IR_PORT);
   uint16_t scan3 = analogRead(IR_PORT);
 
   // Claculate the distance.
-  uint16_t voltage = min(min(scan1, scan2), scan3);
+  float voltage = min(min(scan1, scan2), scan3);
+  voltage = voltage * 5 / 1024;
   float distance = VOLTS_TO_METERS[0] * pow(voltage, 4) +
     VOLTS_TO_METERS[1] * pow(voltage, 3) +
     VOLTS_TO_METERS[2] * pow(voltage, 2) +
     VOLTS_TO_METERS[3] * voltage +
-    VOLTS_TO_METERS[0];
+    VOLTS_TO_METERS[4];
 
   // Transmit one line of text to python with the pitch, yaw, and distance values.
   // NOTE: commas are sent between values, after the last value a Newline is sent.
@@ -82,4 +83,8 @@ void loop() {
       // Do nothing.
     }
   }
+
+  // Otherwise, set the servo positions.
+  yaw_servo.write(yaw);
+  pitch_servo.write(pitch);
 }
