@@ -10,7 +10,8 @@ import matplotlib.pyplot as plt
 
 ARDUINO_PORT = 'COM5'   # Replace with your Arduino's port
 BAUD_RATE = 9600        # Must match Serial.begin() in the Arduino sketch
-IDLE_TIMEOUT_S = 10     # Stop if no valid data arrives for this long
+STARTUP_TIMEOUT_S = 30  # Max wait for the first reading (the sketch waits ~10 s before scanning)
+IDLE_TIMEOUT_S = 5      # After data starts, stop if nothing arrives for this long (scan finished)
 SAVE_CSV = 'scan_data.csv'
 
 # Expected line format from the Arduino:  yaw,pitch,distance
@@ -28,7 +29,10 @@ def read_scan():
     last_data = time.time()
     print("Listening... (Ctrl+C to stop early)")
     try:
-        while time.time() - last_data < IDLE_TIMEOUT_S:
+        while True:
+            limit = IDLE_TIMEOUT_S if rows else STARTUP_TIMEOUT_S
+            if time.time() - last_data > limit:
+                break
             line = ser.readline().decode(errors='ignore').strip()
             if not line:
                 continue
